@@ -3,12 +3,23 @@ package cmd
 import (
 	"fmt"
 
+	"log"
 	"github.com/spf13/cobra"
 )
+func checkErr( err error ) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 func connect(cmd *cobra.Command, args []string) {
 	fmt.Println("add called, args are:")
-	fmt.Println(args)
+	id, err := cmd.Flags().GetInt("id")
+	checkErr(err)
+	url, err := cmd.Flags().GetString("url")
+	checkErr(err)
+	fmt.Println(id, url)
 }
+
 // connectCmd represents the connect command
 var connectCmd = &cobra.Command{
 	Use:   "connect",
@@ -23,6 +34,6 @@ func init() {
 	rootCmd.AddCommand(connectCmd)
 	connectCmd.Flags().StringP("url", "u", "", "Product URL in Amazon")
 	connectCmd.MarkFlagRequired("url")
-	connectCmd.Flags().IntP("id", "i", 0, "Product ID in your ecommerce")
+	connectCmd.Flags().Int("id", 0, "Product ID in your ecommerce")
 	connectCmd.MarkFlagRequired("id")
 }
