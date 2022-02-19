@@ -1,17 +1,12 @@
 package store
 
 import (
-	"github.com/amirkhaki/cmuxbtr/config"
-	"github.com/amirkhaki/cmuxbtr/protocol"
 	"fmt"
 	"context"
 	badger "github.com/dgraph-io/badger/v3"
 )
 
 
-
-var Storage *badgerStore
-var _ protocol.Store = Storage
 
 
 type badgerStore struct {
@@ -75,6 +70,7 @@ func ( s *badgerStore ) Delete(ctx context.Context, key []byte ) error {
 func ( s *badgerStore ) Keys(ctx context.Context) <-chan []byte {
 	c := make(chan []byte)
 	go func(){
+		defer close(c)
 		err := s.db.View(func(txn *badger.Txn) error {
 			opts := badger.DefaultIteratorOptions
 			opts.PrefetchSize = 10
@@ -99,6 +95,7 @@ func ( s *badgerStore ) Keys(ctx context.Context) <-chan []byte {
 }
 
 // Connect to store
+/*
 func Connect( cfg *config.Config ) ( error ) {
 	fmt.Println("connect called")
 	db, err := badger.Open(badger.DefaultOptions(cfg.DBPath))
@@ -109,7 +106,4 @@ func Connect( cfg *config.Config ) ( error ) {
 	return nil
 
 }
-
-func Close() {
-	Storage.db.Close()
-}
+*/

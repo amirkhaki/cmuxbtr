@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"github.com/amirkhaki/cmuxbtr/store"
 	"fmt"
-
+	"strconv"
+	"context"
 	"log"
 	"github.com/spf13/cobra"
 )
@@ -12,12 +14,15 @@ func checkErr( err error ) {
 	}
 }
 func connect(cmd *cobra.Command, args []string) {
+	ctx := context.Background()
 	fmt.Println("add called, args are:")
 	id, err := cmd.Flags().GetInt("id")
 	checkErr(err)
 	url, err := cmd.Flags().GetString("url")
 	checkErr(err)
-	fmt.Println(id, url)
+	err = store.Storage.Set(ctx, []byte(strconv.Itoa(id)), []byte(url))
+	checkErr(err)
+	fmt.Println("connected successfully!")
 }
 
 // connectCmd represents the connect command
