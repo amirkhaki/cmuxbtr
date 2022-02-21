@@ -7,6 +7,10 @@ import (
 
 type Config struct {
 	DBPath string `env:"CB_DB_PATH"`
+	WPURL string `env:"CB_WP_URL"`
+	WPKey string `env:"CB_WP_KEY"`
+	WPSecret string `env:"CB_WP_SECRET"`
+	AEDPrice float64 `env:"CB_AED_PRICE"`
 }
 
 

@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 	Long:  `Have fun :)`,
 }
 
-
+var cfg *config.Config
 func init() {
 	cfg, err := config.New()
 	checkErr(err)

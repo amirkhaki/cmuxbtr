@@ -1,0 +1,7 @@
+#1 Use a bucket for each destination(websites), so can handle multiple websites 
+#2 Add comments
+#3 Write tests
+#4 Add http api
+#5 Add telegram bot
+#6 Support config files
+#6 Request for comment and implement them
