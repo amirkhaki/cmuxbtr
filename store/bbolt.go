@@ -1,25 +1,23 @@
 package store
 
 import (
+	"context"
+	"fmt"
 	"github.com/amirkhaki/cmuxbtr/config"
 	"github.com/amirkhaki/cmuxbtr/protocol"
-	"fmt"
-	"context"
-	"time"
 	bolt "go.etcd.io/bbolt"
+	"time"
 )
-
 
 var bucketName = []byte("wp-amazon")
 var Storage *boltStore
 var _ protocol.Store = Storage
 
-
 type boltStore struct {
 	db *bolt.DB
 }
 
-func ( s *boltStore ) Set(ctx context.Context, key, value []byte ) error {
+func (s *boltStore) Set(ctx context.Context, key, value []byte) error {
 	err := s.db.Update(func(txn *bolt.Tx) error {
 		b, err := txn.CreateBucketIfNotExists(bucketName)
 		if err != nil {
@@ -36,7 +34,7 @@ func ( s *boltStore ) Set(ctx context.Context, key, value []byte ) error {
 	return nil
 }
 
-func ( s *boltStore ) Get(ctx context.Context, key []byte ) (value []byte, _ error) {
+func (s *boltStore) Get(ctx context.Context, key []byte) (value []byte, _ error) {
 	err := s.db.View(func(txn *bolt.Tx) error {
 		b := txn.Bucket(bucketName)
 		if b == nil {
@@ -55,21 +53,21 @@ func ( s *boltStore ) Get(ctx context.Context, key []byte ) (value []byte, _ err
 	return value, nil
 }
 
-func ( s *boltStore ) Update( ctx context.Context, key, value []byte ) error {
+func (s *boltStore) Update(ctx context.Context, key, value []byte) error {
 	if err := s.Set(ctx, key, value); err != nil {
 		return fmt.Errorf("Could not upfate key %x: %w", key, err)
 	}
 	return nil
 }
 
-func ( s *boltStore ) Delete(ctx context.Context, key []byte ) error {
+func (s *boltStore) Delete(ctx context.Context, key []byte) error {
 	err := s.db.Update(func(txn *bolt.Tx) error {
 		b := txn.Bucket(bucketName)
 		if b == nil {
 			return fmt.Errorf("Could not retrieve bucket")
 		}
 		if err := b.Delete(key); err != nil {
-			return fmt.Errorf("Could not delete key %x: %w", key, err)		
+			return fmt.Errorf("Could not delete key %x: %w", key, err)
 		}
 		return nil
 	})
@@ -79,9 +77,9 @@ func ( s *boltStore ) Delete(ctx context.Context, key []byte ) error {
 	return nil
 }
 
-func ( s *boltStore ) Keys(ctx context.Context) <-chan []byte {
+func (s *boltStore) Keys(ctx context.Context) <-chan []byte {
 	c := make(chan []byte)
-	go func(){
+	go func() {
 		defer close(c)
 		err := s.db.View(func(txn *bolt.Tx) error {
 			b := txn.Bucket(bucketName)
@@ -94,7 +92,7 @@ func ( s *boltStore ) Keys(ctx context.Context) <-chan []byte {
 				select {
 				case c <- k:
 					return nil
-				case <- ctx.Done():
+				case <-ctx.Done():
 					return ctx.Err()
 				}
 			})
@@ -109,7 +107,8 @@ func ( s *boltStore ) Keys(ctx context.Context) <-chan []byte {
 }
 
 // Connect to store
-func Connect( cfg *config.Config ) ( error ) {
+func Connect() error {
+	cfg := config.Cfg
 	fmt.Println("connect called")
 	db, err := bolt.Open(cfg.DBPath, 0644, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {

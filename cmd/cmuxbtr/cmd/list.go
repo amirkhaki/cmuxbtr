@@ -5,19 +5,22 @@ Copyright © 2022 Amir Khaki
 package cmd
 
 import (
-	"github.com/amirkhaki/cmuxbtr/store"
 	"context"
 	"fmt"
+	"github.com/amirkhaki/cmuxbtr/store"
 
 	"github.com/spf13/cobra"
 )
 
 func list(cmd *cobra.Command, args []string) {
 	ctx := context.Background()
-	for key := range(store.Storage.Keys(ctx)) {
+	for key := range store.Storage.Keys(ctx) {
 		val, err := store.Storage.Get(ctx, key)
 		checkErr(err)
-		fmt.Printf("%s ==> %s \n", key, val)
+		var prdct Product
+		err = store.Decode(val, &prdct)
+		checkErr(err)
+		fmt.Println(string(key), " ==> ", prdct)
 	}
 }
 
@@ -25,8 +28,8 @@ func list(cmd *cobra.Command, args []string) {
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list of connections",
-	Long: `list`,
-	Run: list, 
+	Long:  `list`,
+	Run:   list,
 }
 
 func init() {

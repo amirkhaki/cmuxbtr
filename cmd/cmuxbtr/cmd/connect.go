@@ -1,14 +1,15 @@
 package cmd
 
 import (
-	"github.com/amirkhaki/cmuxbtr/store"
-	"fmt"
-	"strconv"
 	"context"
-	"log"
+	"fmt"
+	"github.com/amirkhaki/cmuxbtr/store"
 	"github.com/spf13/cobra"
+	"log"
+	"strconv"
 )
-func checkErr( err error ) {
+
+func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -20,7 +21,14 @@ func connect(cmd *cobra.Command, args []string) {
 	checkErr(err)
 	url, err := cmd.Flags().GetString("url")
 	checkErr(err)
-	err = store.Storage.Set(ctx, []byte(strconv.Itoa(id)), []byte(url))
+	tax, err := cmd.Flags().GetFloat64("tax")
+	checkErr(err)
+	wage, err := cmd.Flags().GetFloat64("wage")
+	checkErr(err)
+	prdct := Product{Url: url, Tax: tax, Wage: wage}
+	prdctByte, err := store.Encode(prdct)
+	checkErr(err)
+	err = store.Storage.Set(ctx, []byte(strconv.Itoa(id)), prdctByte)
 	checkErr(err)
 	fmt.Println("connected successfully!")
 }
@@ -38,6 +46,8 @@ var connectCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(connectCmd)
 	connectCmd.Flags().StringP("url", "u", "", "Product URL in Amazon")
+	connectCmd.Flags().Float64P("tax", "t", 0, "tax")
+	connectCmd.Flags().Float64P("wage", "w", 0, "wage")
 	connectCmd.MarkFlagRequired("url")
 	connectCmd.Flags().Int("id", 0, "Product ID in your ecommerce")
 	connectCmd.MarkFlagRequired("id")

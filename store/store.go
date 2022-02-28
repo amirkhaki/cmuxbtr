@@ -1,19 +1,16 @@
 package store
 
 import (
-	"fmt"
 	"context"
+	"fmt"
 	badger "github.com/dgraph-io/badger/v3"
 )
-
-
-
 
 type badgerStore struct {
 	db *badger.DB
 }
 
-func ( s *badgerStore ) Set(ctx context.Context, key, value []byte ) error {
+func (s *badgerStore) Set(ctx context.Context, key, value []byte) error {
 	err := s.db.Update(func(txn *badger.Txn) error {
 		if err := txn.Set(key, value); err != nil {
 			return fmt.Errorf("Could not set key %x: %w", key, err)
@@ -26,7 +23,7 @@ func ( s *badgerStore ) Set(ctx context.Context, key, value []byte ) error {
 	return nil
 }
 
-func ( s *badgerStore ) Get(ctx context.Context, key []byte ) (value []byte, _ error) {
+func (s *badgerStore) Get(ctx context.Context, key []byte) (value []byte, _ error) {
 	err := s.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(key)
 		if err != nil {
@@ -47,17 +44,17 @@ func ( s *badgerStore ) Get(ctx context.Context, key []byte ) (value []byte, _ e
 	return value, nil
 }
 
-func ( s *badgerStore ) Update( ctx context.Context, key, value []byte ) error {
+func (s *badgerStore) Update(ctx context.Context, key, value []byte) error {
 	if err := s.Set(ctx, key, value); err != nil {
 		return fmt.Errorf("Could not upfate key %x: %w", key, err)
 	}
 	return nil
 }
 
-func ( s *badgerStore ) Delete(ctx context.Context, key []byte ) error {
+func (s *badgerStore) Delete(ctx context.Context, key []byte) error {
 	err := s.db.Update(func(txn *badger.Txn) error {
 		if err := txn.Delete(key); err != nil {
-			return fmt.Errorf("Could not delete key %x: %w", key, err)		
+			return fmt.Errorf("Could not delete key %x: %w", key, err)
 		}
 		return nil
 	})
@@ -67,9 +64,9 @@ func ( s *badgerStore ) Delete(ctx context.Context, key []byte ) error {
 	return nil
 }
 
-func ( s *badgerStore ) Keys(ctx context.Context) <-chan []byte {
+func (s *badgerStore) Keys(ctx context.Context) <-chan []byte {
 	c := make(chan []byte)
-	go func(){
+	go func() {
 		defer close(c)
 		err := s.db.View(func(txn *badger.Txn) error {
 			opts := badger.DefaultIteratorOptions
@@ -80,7 +77,7 @@ func ( s *badgerStore ) Keys(ctx context.Context) <-chan []byte {
 				item := it.Item()
 				select {
 				case c <- item.Key():
-				case <- ctx.Done():
+				case <-ctx.Done():
 					return ctx.Err()
 				}
 			}

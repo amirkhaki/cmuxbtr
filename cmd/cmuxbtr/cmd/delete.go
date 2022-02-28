@@ -7,9 +7,9 @@ package cmd
 import (
 	"github.com/amirkhaki/cmuxbtr/store"
 
-	"strconv"
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -18,7 +18,7 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "delete connection",
-	Long: `delete`,
+	Long:  `delete`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("delete called")
 		ctx := context.Background()
